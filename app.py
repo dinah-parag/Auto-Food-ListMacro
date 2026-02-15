@@ -1,7 +1,28 @@
 import streamlit as st
 import pandas as pd
 
-# Simulando base de dados
+taco = pd.read_csv("data/taco.csv")
+recipes = pd.read_csv("data/recipes.csv")
+
+merged = recipes.merge(
+    taco,
+    left_on="ingredient",
+    right_on="alimento",
+    how="left"
+)
+
+merged["proteina_total"] = (merged["proteina_g"] * merged["quantity_g"]) / 100
+merged["carbo_total"] = (merged["carboidrato_g"] * merged["quantity_g"]) / 100
+merged["gordura_total"] = (merged["gordura_g"] * merged["quantity_g"]) / 100
+
+grouped = merged.groupby("ingredient").agg({
+    "quantity_g": "sum",
+    "proteina_total": "sum",
+    "carbo_total": "sum",
+    "gordura_total": "sum"
+}).reset_index()
+
+
 data = {
     "dish": ["Frango", "Frango", "Omelete", "Omelete"],
     "ingredient": ["Frango", "Arroz", "Ovo", "Queijo"],
@@ -26,6 +47,9 @@ if st.button("Gerar Lista"):
     weekly_dishes = [d.strip() for d in dishes_input.split(",")]
     filtered_df = df[df["dish"].isin(weekly_dishes)]
 
+if filtered_df.empty:
+        st.error("❌ Receita não encontrada na base de dados.")
+else:
     grouped = filtered_df.groupby(["ingredient", "unit"]).agg({
         "quantity": "sum",
         "protein": "sum",
@@ -45,3 +69,16 @@ if st.button("Gerar Lista"):
     st.write(f"Proteína: {total_protein} g")
     st.write(f"Carboidratos: {total_carbs} g")
     st.write(f"Gordura: {total_fat} g")
+
+    txt_content = ""
+
+for _, row in grouped.iterrows():
+    txt_content += f"{row['ingredient']} - {row['quantity']} {row['unit']}\n"
+
+st.download_button(
+    label="📥 Baixar lista (.txt)",
+    data=txt_content,
+    file_name="lista_de_compras.txt",
+    mime="text/plain"
+)
+
