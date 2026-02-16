@@ -1,14 +1,14 @@
-from data_loader import load_data
-from consolidator import consolidate_ingredients
+from data_loader import load_afrodite, explode_ingredientes, limpar_ingredientes, parse_ingredientes
 
-df = load_data("data/recipes.csv")
+def main():
+    df = load_afrodite()
+    df_exploded = explode_ingredientes(df)
+    df_limpo = limpar_ingredientes(df_exploded)
+    df_parsed = parse_ingredientes(df_limpo)
 
-weekly_dishes = input("Digite os pratos da semana separados por vírgula: ").split(",")
+    print(df_parsed.head(10))
+    print("Total após parsing:", len(df_parsed))
 
-weekly_dishes = [dish.strip() for dish in weekly_dishes]
 
-filtered_df = df[df["dish"].isin(weekly_dishes)]
-
-shopping_list = consolidate_ingredients(filtered_df)
-
-print(shopping_list)
+if __name__ == "__main__":
+    main()
