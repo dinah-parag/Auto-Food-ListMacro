@@ -1,4 +1,12 @@
-from data_loader import load_afrodite, explode_ingredientes, limpar_ingredientes, parse_ingredientes
+from data_loader import (
+    load_afrodite,
+    explode_ingredientes,
+    limpar_ingredientes,
+    parse_ingredientes,
+    load_taco,
+    integrar_taco
+)
+
 
 def main():
     df = load_afrodite()
@@ -6,8 +14,12 @@ def main():
     df_limpo = limpar_ingredientes(df_exploded)
     df_parsed = parse_ingredientes(df_limpo)
 
-    print(df_parsed.head(10))
-    print("Total após parsing:", len(df_parsed))
+    df_taco = load_taco()
+
+    df_final = integrar_taco(df_parsed, df_taco)
+
+    print("Linhas após merge:", len(df_final))
+    print(df_final.head())
 
 
 if __name__ == "__main__":
